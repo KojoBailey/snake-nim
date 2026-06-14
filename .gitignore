@@ -2,3 +2,6 @@ nimcache/
 nimblecache/
 htmldocs/
 snake
+nimble.develop
+nimble.paths
+nimbledeps
