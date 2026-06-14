@@ -6,7 +6,7 @@ import std/random
 const
     screenWidth = 800
     screenHeight = 600
-    cellSize = 40 # Should be a factor of width and height
+    cellSize = 100 # Should be a factor of width and height
     cellDimensions = Vector2(x: cellSize, y: cellSize)
     tickRate = 0.15
 
@@ -87,15 +87,6 @@ proc draw(self: Snake) =
 type Apple = object
     position: Vector2
 
-proc goToRandPos(self: var Apple) =
-        self.position = Vector2(
-            x: float32(rand(0..(screenWidth div cellSize - 1)) * cellSize),
-            y: float32(rand(0..(screenHeight div cellSize - 1)) * cellSize),
-        )
-
-proc newApple(): Apple =
-    result.goToRandPos()
-
 proc draw(self: var Apple) =
     drawRectangle(self.position, cellDimensions, Red)
 
@@ -103,6 +94,23 @@ var
     snake: Snake
     apple: Apple
     lastTick = 0.0
+
+proc goToRandPos(self: var Apple) =
+    while true:
+        self.position = Vector2(
+            x: float32(rand(0..(screenWidth div cellSize - 1)) * cellSize),
+            y: float32(rand(0..(screenHeight div cellSize - 1)) * cellSize),
+        )
+
+        var isInSnake = false
+        for i in 0..snake.length-1:
+            if snake.body[i].position == self.position:
+                isInSnake = true
+                break
+        if not isInSnake: break
+
+proc newApple(): Apple =
+    result.goToRandPos()
 
 initWindow(screenWidth, screenHeight, "Snake")
 setTargetFPS(60)
