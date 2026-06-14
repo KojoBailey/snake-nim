@@ -70,6 +70,7 @@ proc advance(self: var Snake) =
 
 proc grow(self: var Snake) =
     self.length += 1
+    self.body[self.length-1].position = Vector2(x: -1000.0, y: -1000.0)
 
 proc draw(self: Snake) =
     for i in 0 .. self.length - 1:
