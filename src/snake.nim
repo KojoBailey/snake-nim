@@ -22,18 +22,18 @@ type SnakePiece = object
     oldPosition: Vector2
     direction: Direction
 
-proc advance(this: var SnakePiece) =
-    case this.direction
-    of    up: this.position.y -= gridSize
-    of  down: this.position.y += gridSize
-    of right: this.position.x += gridSize
-    of  left: this.position.x -= gridSize
+proc advance(self: var SnakePiece) =
+    case self.direction
+    of    up: self.position.y -= gridSize
+    of  down: self.position.y += gridSize
+    of right: self.position.x += gridSize
+    of  left: self.position.x -= gridSize
 
-proc savePosition(this: var SnakePiece) =
-    this.oldPosition = this.position
+proc savePosition(self: var SnakePiece) =
+    self.oldPosition = self.position
 
-proc draw(this: SnakePiece) =
-    drawRectangle(this.position, gridDimensions, Green)
+proc draw(self: SnakePiece) =
+    drawRectangle(self.position, gridDimensions, Green)
 
 type Snake = object
     head: ptr SnakePiece
@@ -46,40 +46,40 @@ proc newSnake(startPos: Vector2): Snake =
     result.head.position = startPos
     result.head.direction = right
 
-proc updateDirection(this: var Snake) =
+proc updateDirection(self: var Snake) =
     case getInputAxis(Right, Left)
-    of  1: this.head.direction = right
-    of -1: this.head.direction = left
+    of  1: self.head.direction = right
+    of -1: self.head.direction = left
     else: discard
 
     case getInputAxis(Up, Down)
-    of  1: this.head.direction = up
-    of -1: this.head.direction = down
+    of  1: self.head.direction = up
+    of -1: self.head.direction = down
     else: discard
 
-proc advance(this: var Snake) =
-    this.head[].savePosition()
-    this.head[].advance()
+proc advance(self: var Snake) =
+    self.head[].savePosition()
+    self.head[].advance()
 
-    if this.length > 1:
-        for i in 1 .. this.length - 1:
-            let curr = addr this.body[i]
-            let prev = addr this.body[i-1]
+    if self.length > 1:
+        for i in 1 .. self.length - 1:
+            let curr = addr self.body[i]
+            let prev = addr self.body[i-1]
             curr[].savePosition()
             curr.position = prev.oldPosition
 
-proc grow(this: var Snake) =
-    this.length += 1
+proc grow(self: var Snake) =
+    self.length += 1
 
-proc draw(this: Snake) =
-    for i in 0 .. this.length - 1:
-        this.body[i].draw()
+proc draw(self: Snake) =
+    for i in 0 .. self.length - 1:
+        self.body[i].draw()
 
 type Apple = object
     position: Vector2
 
-proc goToRandPos(this: var Apple) =
-        this.position = Vector2(
+proc goToRandPos(self: var Apple) =
+        self.position = Vector2(
             x: float32(rand(0..(screenWidth div gridSize - 1)) * gridSize),
             y: float32(rand(0..(screenHeight div gridSize - 1)) * gridSize),
         )
@@ -87,8 +87,8 @@ proc goToRandPos(this: var Apple) =
 proc newApple(): Apple =
     result.position = Vector2(x: 100, y: 100)
 
-proc draw(this: var Apple) =
-    drawRectangle(this.position, gridDimensions, Red)
+proc draw(self: var Apple) =
+    drawRectangle(self.position, gridDimensions, Red)
 
 var
     snake: Snake
