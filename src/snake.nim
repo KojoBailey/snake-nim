@@ -10,6 +10,8 @@ const
     cellDimensions = Vector2(x: cellSize, y: cellSize)
     tickRate = 0.15
 
+var isGameOver = false
+
 proc getInputAxis(upper: KeyboardKey, lower: KeyboardKey): int =
     (if isKeyDown(upper): 1 else: 0) - (if isKeyDown(lower): 1 else: 0)
 
@@ -76,6 +78,15 @@ proc advance(self: var Snake) =
             curr[].savePosition()
             curr.position = prev.oldPosition
 
+proc checkCollision(self: var Snake) =
+    if self.head.position.x >= screenWidth or self.head.position.y >= screenHeight or
+        self.head.position.x < 0 or self.head.position.y < 0:
+            isGameOver = true
+
+    for i in 1 .. self.length-1:
+        if self.head.position == self.body[i].position:
+           isGameOver = true
+
 proc grow(self: var Snake) =
     self.length += 1
     self.body[self.length-1].position = Vector2(x: -1000.0, y: -1000.0)
@@ -120,13 +131,14 @@ randomize() # Initialise std/random
 snake = newSnake(Vector2(x: cellSize, y: cellSize))
 apple = newApple()
 
-while not windowShouldClose():
+while not windowShouldClose() and not isGameOver:
     beginDrawing()
     clearBackground(Black)
     
     snake.updateDirection()
     if getTime() - lastTick >= tickRate:
         snake.advance()
+        snake.checkCollision()
         if snake.head.position == apple.position:
             apple.goToRandPos()
             snake.grow()
