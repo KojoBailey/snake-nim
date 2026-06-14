@@ -6,11 +6,12 @@ import std/random
 const
     screenWidth = 800
     screenHeight = 600
-    cellSize = 100 # Should be a factor of width and height
+    cellSize = 40 # Should be a factor of width and height
     cellDimensions = Vector2(x: cellSize, y: cellSize)
     tickRate = 0.15
 
 var isGameOver = false
+var score = 0
 
 proc getInputAxis(upper: KeyboardKey, lower: KeyboardKey): int =
     (if isKeyDown(upper): 1 else: 0) - (if isKeyDown(lower): 1 else: 0)
@@ -90,6 +91,7 @@ proc checkCollision(self: var Snake) =
 proc grow(self: var Snake) =
     self.length += 1
     self.body[self.length-1].position = Vector2(x: -1000.0, y: -1000.0)
+    score += 1
 
 proc draw(self: Snake) =
     for i in 0 .. self.length - 1:
@@ -146,6 +148,7 @@ while not windowShouldClose() and not isGameOver:
 
     apple.draw()
     snake.draw()
+    drawText($score, screenWidth div 2 - measureText($score, 40) div 2, 40, 40, White)
 
     endDrawing()
 
