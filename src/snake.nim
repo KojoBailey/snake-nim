@@ -42,6 +42,7 @@ type Snake = object
     head: ptr SnakePiece
     body: array[0..512, SnakePiece]
     length: uint32
+    oldDirection: Direction
 
 proc newSnake(startPos: Vector2): Snake =
     result.head = addr result.body[0]
@@ -52,19 +53,19 @@ proc newSnake(startPos: Vector2): Snake =
 proc updateDirection(self: var Snake) =
     case getInputAxis(Right, Left)
     of  1:
-        if self.head.direction != left:
+        if self.oldDirection != left:
             self.head.direction = right
     of -1:
-        if self.head.direction != right:
+        if self.oldDirection != right:
             self.head.direction = left
     else: discard
 
     case getInputAxis(Up, Down)
     of  1:
-        if self.head.direction != down:
+        if self.oldDirection != down:
             self.head.direction = up
     of -1:
-        if self.head.direction != up:
+        if self.oldDirection != up:
             self.head.direction = down
     else: discard
 
@@ -78,6 +79,8 @@ proc advance(self: var Snake) =
             let prev = addr self.body[i-1]
             curr[].savePosition()
             curr.position = prev.oldPosition
+
+    self.oldDirection = self.head.direction
 
 proc checkCollision(self: var Snake) =
     if self.head.position.x >= screenWidth or self.head.position.y >= screenHeight or
