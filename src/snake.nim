@@ -10,24 +10,39 @@ const
     gridDimensions = Vector2(x: gridSize, y: gridSize)
     tickRate = 0.15
 
+proc getInputAxis(upper: KeyboardKey, lower: KeyboardKey): int =
+    (if isKeyDown(upper): 1 else: 0) - (if isKeyDown(lower): 1 else: 0)
+
 type
     Direction = enum
         up, down, left, right
 
-    SnakePiece = object
-        position: Vector2
-        direction: Direction
+type SnakePiece = object
+    position: Vector2
+    oldPosition: Vector2
+    direction: Direction
 
-proc getInputAxis(upper: KeyboardKey, lower: KeyboardKey): int =
-    (if isKeyDown(upper): 1 else: 0) - (if isKeyDown(lower): 1 else: 0)
+proc advance(this: var SnakePiece) =
+    case this.direction
+    of    up: this.position.y -= gridSize
+    of  down: this.position.y += gridSize
+    of right: this.position.x += gridSize
+    of  left: this.position.x -= gridSize
+
+proc savePosition(this: var SnakePiece) =
+    this.oldPosition = this.position
+
+proc draw(this: SnakePiece) =
+    drawRectangle(this.position, gridDimensions, Green)
 
 type Snake = object
-        head: ptr SnakePiece
-        body: array[0..512, SnakePiece]
-        length: uint32
+    head: ptr SnakePiece
+    body: array[0..512, SnakePiece]
+    length: uint32
 
 proc newSnake(startPos: Vector2): Snake =
     result.head = addr result.body[0]
+    result.length = 1
     result.head.position = startPos
     result.head.direction = right
 
@@ -42,21 +57,26 @@ proc updateDirection(this: var Snake) =
     of -1: this.head.direction = down
     else: discard
 
-proc move(this: var Snake) =
-    case this.head.direction
-    of    up: this.head.position.y -= gridSize
-    of  down: this.head.position.y += gridSize
-    of right: this.head.position.x += gridSize
-    of  left: this.head.position.x -= gridSize
+proc advance(this: var Snake) =
+    this.head[].savePosition()
+    this.head[].advance()
+
+    if this.length > 1:
+        for i in 1 .. this.length - 1:
+            let curr = addr this.body[i]
+            let prev = addr this.body[i-1]
+            curr[].savePosition()
+            curr.position = prev.oldPosition
 
 proc grow(this: var Snake) =
     this.length += 1
 
-proc draw(this: var Snake) =
-    drawRectangle(this.head.position, gridDimensions, Green)
+proc draw(this: Snake) =
+    for i in 0 .. this.length - 1:
+        this.body[i].draw()
 
 type Apple = object
-        position: Vector2
+    position: Vector2
 
 proc goToRandPos(this: var Apple) =
         this.position = Vector2(
@@ -75,15 +95,10 @@ var
     apple: Apple
     lastTick = 0.0
 
-proc checkApple() =
-    if snake.head.position == apple.position:
-        apple.goToRandPos()
-        snake.grow()
-
 initWindow(screenWidth, screenHeight, "Snake")
 setTargetFPS(60)
 
-randomize()
+randomize() # Initialise std/random
 
 snake = newSnake(Vector2(x: screenWidth div 2, y: screenHeight div 2))
 apple = newApple()
@@ -94,8 +109,10 @@ while not windowShouldClose():
     
     snake.updateDirection()
     if getTime() - lastTick >= tickRate:
-        snake.move()
-        checkApple()
+        snake.advance()
+        if snake.head.position == apple.position:
+            apple.goToRandPos()
+            snake.grow()
         lastTick = getTime()
 
     apple.draw()
