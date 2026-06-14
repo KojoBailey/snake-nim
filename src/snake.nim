@@ -6,8 +6,8 @@ import std/random
 const
     screenWidth = 800
     screenHeight = 600
-    gridSize = 20 # Should be a factor of width and height
-    gridDimensions = Vector2(x: gridSize, y: gridSize)
+    cellSize = 40 # Should be a factor of width and height
+    cellDimensions = Vector2(x: cellSize, y: cellSize)
     tickRate = 0.15
 
 proc getInputAxis(upper: KeyboardKey, lower: KeyboardKey): int =
@@ -24,16 +24,16 @@ type SnakePiece = object
 
 proc advance(self: var SnakePiece) =
     case self.direction
-    of    up: self.position.y -= gridSize
-    of  down: self.position.y += gridSize
-    of right: self.position.x += gridSize
-    of  left: self.position.x -= gridSize
+    of    up: self.position.y -= cellSize
+    of  down: self.position.y += cellSize
+    of right: self.position.x += cellSize
+    of  left: self.position.x -= cellSize
 
 proc savePosition(self: var SnakePiece) =
     self.oldPosition = self.position
 
 proc draw(self: SnakePiece) =
-    drawRectangle(self.position, gridDimensions, Green)
+    drawRectangle(self.position, cellDimensions, Green)
 
 type Snake = object
     head: ptr SnakePiece
@@ -48,13 +48,21 @@ proc newSnake(startPos: Vector2): Snake =
 
 proc updateDirection(self: var Snake) =
     case getInputAxis(Right, Left)
-    of  1: self.head.direction = right
-    of -1: self.head.direction = left
+    of  1:
+        if self.head.direction != left:
+            self.head.direction = right
+    of -1:
+        if self.head.direction != right:
+            self.head.direction = left
     else: discard
 
     case getInputAxis(Up, Down)
-    of  1: self.head.direction = up
-    of -1: self.head.direction = down
+    of  1:
+        if self.head.direction != down:
+            self.head.direction = up
+    of -1:
+        if self.head.direction != up:
+            self.head.direction = down
     else: discard
 
 proc advance(self: var Snake) =
@@ -81,15 +89,15 @@ type Apple = object
 
 proc goToRandPos(self: var Apple) =
         self.position = Vector2(
-            x: float32(rand(0..(screenWidth div gridSize - 1)) * gridSize),
-            y: float32(rand(0..(screenHeight div gridSize - 1)) * gridSize),
+            x: float32(rand(0..(screenWidth div cellSize - 1)) * cellSize),
+            y: float32(rand(0..(screenHeight div cellSize - 1)) * cellSize),
         )
 
 proc newApple(): Apple =
-    result.position = Vector2(x: 100, y: 100)
+    result.goToRandPos()
 
 proc draw(self: var Apple) =
-    drawRectangle(self.position, gridDimensions, Red)
+    drawRectangle(self.position, cellDimensions, Red)
 
 var
     snake: Snake
@@ -101,7 +109,7 @@ setTargetFPS(60)
 
 randomize() # Initialise std/random
 
-snake = newSnake(Vector2(x: screenWidth div 2, y: screenHeight div 2))
+snake = newSnake(Vector2(x: cellSize, y: cellSize))
 apple = newApple()
 
 while not windowShouldClose():
