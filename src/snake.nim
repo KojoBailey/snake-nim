@@ -80,8 +80,8 @@ type Apple = object
 
 proc goToRandPos(this: var Apple) =
         this.position = Vector2(
-            x: float32(rand(0..(screenWidth div gridSize)) * gridSize),
-            y: float32(rand(0..(screenHeight div gridSize)) * gridSize),
+            x: float32(rand(0..(screenWidth div gridSize - 1)) * gridSize),
+            y: float32(rand(0..(screenHeight div gridSize - 1)) * gridSize),
         )
 
 proc newApple(): Apple =
