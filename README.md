@@ -18,7 +18,7 @@ Use your arrow keys to move the green character (the snake) to eat the red squar
 How high of a score can you get?
 
 <div align="center">
-<img width="50%" alt="Title Screen" src="./preview/gameplay.png" />
+<img width="50%" alt="Gameplay" src="./preview/gameplay.png" />
 </div>
 
 ## Bugs
