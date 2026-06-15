@@ -23,3 +23,8 @@ How high of a score can you get?
 
 ## Bugs
 There are currently no bugs that I know of, but if you do happen to spot any, please let me know by opening an [issue](https://github.com/KojoBailey/snake-nim/issues). Pull requests are also welcome if you so wish, although I will only be accepting bug fixes.
+
+## Reflections
+I wrote a blog post detailing my thoughts on Nim after making this project. Check it out!
+
+https://kojobailey.me/posts/first-date-with-nim/
