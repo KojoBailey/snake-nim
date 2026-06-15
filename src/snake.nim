@@ -191,6 +191,14 @@ while not windowShouldClose():
             else:
                 tip = "You... win"
             drawText(tip, centerTextHorizontal(tip, 25), 140, 25, Red)
+        else:
+            const title = "Snake"
+            drawText(title, centerTextHorizontal(title, 100), 80, 100, Green)
+
+            const author = "by Kojo Bailey"
+            drawText(author, centerTextHorizontal(author, 30), screenHeight - 140, 30, Yellow)
+            const tool = "made in Nim with Naylib"
+            drawText(tool, centerTextHorizontal(tool, 30), screenHeight - 100, 30, Yellow)
 
         const startText = "Press ENTER to start"
         drawText(startText, centerTextHorizontal(startText, 40), screenHeight div 2 - 20, 40, White)
