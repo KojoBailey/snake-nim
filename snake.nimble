@@ -1,5 +1,5 @@
 # Package
-version       = "0.1.0"
+version       = "1.0.0"
 author        = "Kojo Bailey"
 description   = "Snake game in Nim"
 license       = "AGPL-3.0-or-later"
