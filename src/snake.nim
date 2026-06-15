@@ -2,6 +2,7 @@ import raylib
 
 import std/math
 import std/random
+import std/strformat
 
 const
     screenWidth = 800
@@ -10,11 +11,19 @@ const
     cellDimensions = Vector2(x: cellSize, y: cellSize)
     tickRate = 0.15
 
-var isGameOver = false
-var score = 0
+var isGameOver = true
+var shouldShowStats = false
+var score: uint64
+
+proc triggerGameOver() =
+    isGameOver = true
+    shouldShowStats = true
 
 proc getInputAxis(upper: KeyboardKey, lower: KeyboardKey): int =
     (if isKeyDown(upper): 1 else: 0) - (if isKeyDown(lower): 1 else: 0)
+
+proc centerTextHorizontal(text: string, fontSize: int32): int32 =
+    screenWidth div 2 - measureText(text, fontSize) div 2
 
 type
     Direction = enum
@@ -85,11 +94,11 @@ proc advance(self: var Snake) =
 proc checkCollision(self: var Snake) =
     if self.head.position.x >= screenWidth or self.head.position.y >= screenHeight or
         self.head.position.x < 0 or self.head.position.y < 0:
-            isGameOver = true
+            triggerGameOver()
 
     for i in 1 .. self.length-1:
         if self.head.position == self.body[i].position:
-           isGameOver = true
+            triggerGameOver()
 
 proc grow(self: var Snake) =
     self.length += 1
@@ -128,30 +137,80 @@ proc goToRandPos(self: var Apple) =
 proc newApple(): Apple =
     result.goToRandPos()
 
+proc reset() =
+    isGameOver = false
+    snake = newSnake(Vector2(x: cellSize, y: cellSize))
+    apple = newApple()
+    score = 0
+
 initWindow(screenWidth, screenHeight, "Snake")
 setTargetFPS(60)
 
 randomize() # Initialise std/random
 
-snake = newSnake(Vector2(x: cellSize, y: cellSize))
-apple = newApple()
-
-while not windowShouldClose() and not isGameOver:
+while not windowShouldClose():
     beginDrawing()
     clearBackground(Black)
-    
-    snake.updateDirection()
-    if getTime() - lastTick >= tickRate:
-        snake.advance()
-        snake.checkCollision()
-        if snake.head.position == apple.position:
-            apple.goToRandPos()
-            snake.grow()
-        lastTick = getTime()
 
-    apple.draw()
-    snake.draw()
-    drawText($score, screenWidth div 2 - measureText($score, 40) div 2, 40, 40, White)
+    if isGameOver:
+        if isKeyDown(Enter):
+            reset()
+
+        if shouldShowStats:
+            let stats = fmt"You scored {score} that round"
+            drawText(stats, centerTextHorizontal(stats, 40), 80, 40, Yellow)
+            
+            var tip: string
+            case score
+            of 0..2:
+                tip = "Maybe try moving the arrow keys..."
+            of 3..9:
+                tip = "Giving up already?"
+            of 10..19:
+                tip = "Congrats, you hit double digits"
+            of 20..29:
+                tip = "Not bad... but far from great"
+            of 30..39:
+                tip = "Hey, that's pretty good"
+            of 40..49:
+                tip = "You have some stamina"
+            of 50..59:
+                tip = "Do you not get bored?"
+            of 60..68:
+                tip = "This is groundbreaking"
+            of 69:
+                tip = "Nice"
+            of 70..79:
+                tip = "Your commitment is admirable"
+            of 80..89:
+                tip = "Do your fingers not tire?"
+            of 90..99:
+                tip = "What is your goal?"
+            of 100..199:
+                tip = "Most impressive"
+            else:
+                tip = "You... win"
+            drawText(tip, centerTextHorizontal(tip, 25), 140, 25, Red)
+
+        const startText = "Press ENTER to start"
+        drawText(startText, centerTextHorizontal(startText, 40), screenHeight div 2 - 20, 40, White)
+    
+    if not isGameOver:
+        snake.updateDirection()
+        if getTime() - lastTick >= tickRate:
+            snake.advance()
+            snake.checkCollision()
+            if snake.head.position == apple.position:
+                apple.goToRandPos()
+                snake.grow()
+            lastTick = getTime()
+
+        apple.draw()
+        snake.draw()
+
+        let scoreStr = $score
+        const scoreFontWidth = 60
+        drawText(scoreStr, centerTextHorizontal(scoreStr, scoreFontWidth), 40, scoreFontWidth, White)
 
     endDrawing()
 
